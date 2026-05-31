@@ -6,19 +6,20 @@ import os
 
 # --- PAGE CONFIGURATION & ACADEMIC THEME ---
 st.set_page_config(
-    page_title="Lactic Acid Digital Twin | Graduation Project", 
+    page_title="Design and kinetic modeling of the Lactiplantibacillus plantarum", 
     page_icon="🔬", 
     layout="wide", 
-    initial_sidebar_state="collapsed" # Giriş sayfasında yan menüyü gizleyip daha temiz bir görünüm sağlar
+    initial_sidebar_state="collapsed"
 )
 
 # Custom CSS for academic aesthetic
 st.markdown("""
     <style>
-    .main-header {font-size: 2.5rem; font-weight: 700; color: #1E3A8A; text-align: center; margin-bottom: 0px;}
+    .main-header {font-size: 2.2rem; font-weight: 700; color: #1E3A8A; text-align: center; margin-bottom: 10px; line-height: 1.2;}
     .sub-header {font-size: 1.2rem; font-weight: 400; color: #4B5563; text-align: center; margin-bottom: 30px;}
-    .section-title {color: #1E3A8A; border-bottom: 2px solid #E5E7EB; padding-bottom: 5px; margin-top: 20px;}
-    .qr-thanks {text-align: center; font-style: italic; color: #10B981; margin-top: 40px; font-weight: 500;}
+    .section-title {color: #1E3A8A; border-bottom: 2px solid #E5E7EB; padding-bottom: 5px; margin-top: 25px;}
+    .qr-thanks {text-align: center; font-style: italic; color: #10B981; margin-top: 50px; font-weight: 500;}
+    .content-text {font-size: 1.1rem; line-height: 1.6; color: #374151; text-align: justify;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -30,51 +31,53 @@ def enter_simulator():
     st.session_state.page = 'simulator'
 
 # ==========================================
-# 1. LANDING PAGE (Academic Presentation)
+# 1. LANDING PAGE (Formal Academic Abstract)
 # ==========================================
 if st.session_state.page == 'landing':
     
-    st.markdown('<p class="main-header">Predictive Digital Twin for Lactic Acid Fermentation</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">Design and kinetic modeling of the <i>Lactiplantibacillus plantarum</i>: compare different strains with different kinetic parameters</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Marmara University • Bioengineering Department • Senior Graduation Project</p>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 6, 1])
     
     with col2:
-        st.info("**Developer:** Mehmet Anıl Tipici | 4th-Year Bioengineering Student")
-        
-        st.markdown('<h3 class="section-title">Project Evolution & Scientific Background</h3>', unsafe_allow_html=True)
+        st.markdown('<h3 class="section-title">Project Overview & Development</h3>', unsafe_allow_html=True)
         st.markdown("""
-        Initially, this design project was conceptualized to optimize the bioprocess parameters for a single, specific strain of *Lactiplantibacillus plantarum*. However, to provide a more robust engineering solution, the project evolved into a dynamic, predictive digital twin.
-        
-        Instead of a static simulation, this interface allows users to input specific experimental Monod kinetic data—namely, the Maximum Specific Growth Rate ($\mu_{max}$) and the Half-Saturation Constant ($K_s$)—for various theoretical or newly isolated strains. 
-        
-        By coupling these biological parameters with a mathematically constrained Continuous Stirred-Tank Reactor (CSTR) model (operating strictly at a **90% working-to-vessel volume ratio**), the algorithm predicts how the unique kinetics of any given strain will translate into industrial-scale lactic acid yield and overall process efficiency.
-        """)
+        <div class="content-text">
+        This interactive digital twin was developed within the scope of a senior graduation project at the Bioengineering Department of Marmara University. The model was designed and engineered by Mehmet Anıl Tipici to bridge the gap between theoretical biological kinetics and industrial-scale chemical plant operations. The primary objective of this system is to simulate the continuous production of lactic acid utilizing <i>Lactiplantibacillus plantarum</i>.
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown('<h3 class="section-title">Scientific Evolution</h3>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="content-text">
+        Initially, the study was conceptualized to optimize the bioprocess parameters for a single, specific strain. However, to provide a more robust and comprehensive engineering solution, the scope was expanded. The current model was constructed to compare different strains possessing distinct kinetic parameters. Experimental Monod kinetic data—namely, the Maximum Specific Growth Rate ($\\mu_{max}$) and the Half-Saturation Constant ($K_s$)—can be inputted into the system to evaluate how varying biological potentials translate into industrial-scale lactic acid yield.
+        </div>
+        """, unsafe_allow_html=True)
 
         st.markdown('<h3 class="section-title">Simulation Methodology</h3>', unsafe_allow_html=True)
         st.markdown("""
-        The backend utilizes a K-Nearest Neighbors (KNN) algorithm to evaluate the inputted kinetic parameters against a comprehensive MATLAB-generated database of pre-simulated industrial configurations. The system then assigns a standardized efficiency score (ranging from 1.0 to 10.0) and retrieves the exact, calibrated **SuperPro Designer** process output.
-        """)
+        <div class="content-text">
+        A Continuous Stirred-Tank Reactor (CSTR) model was utilized, strictly constrained to operate at a <b>90% working-to-vessel volume ratio</b>. The backend algorithm was designed using a K-Nearest Neighbors (KNN) approach to evaluate the inputted kinetic parameters against a comprehensive database of pre-simulated industrial configurations. Upon evaluation, a standardized efficiency score (ranging from 1.0 to 10.0) is assigned, and the precise, calibrated <b>SuperPro Designer</b> process output is retrieved for the user.
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Center the button
         btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 1])
         with btn_col2:
             st.button("Launch Interactive Simulator", on_click=enter_simulator, type="primary", use_container_width=True)
             
-        st.markdown('<p class="qr-thanks">Thank you for scanning the QR code and taking the time to explore my graduation project!</p>', unsafe_allow_html=True)
+        st.markdown('<p class="qr-thanks">Special thanks are extended to the jury members and attendees for scanning the QR code and exploring the details of this graduation project.</p>', unsafe_allow_html=True)
 
 # ==========================================
 # 2. SIMULATOR PAGE (Clean Industrial Dashboard)
 # ==========================================
 elif st.session_state.page == 'simulator':
     
-    # Reveal sidebar inputs for the simulator
     st.sidebar.title("Kinetic Input Parameters")
     st.sidebar.markdown("Define the experimental Monod data for the target strain.")
     
-    # Sliders matching the MATLAB generation ranges
     exp_mu = st.sidebar.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 1.00, 0.45, 0.01)
     exp_Ks = st.sidebar.slider("Half-Saturation (Ks) [g/L]", 0.01, 2.00, 0.50, 0.01)
     
