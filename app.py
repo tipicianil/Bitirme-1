@@ -6,32 +6,70 @@ import os
 
 # --- PAGE CONFIGURATION & ACADEMIC THEME ---
 st.set_page_config(
-    page_title="Design and kinetic modeling of the Lactiplantibacillus plantarum", 
-    page_icon="🔬", 
+    page_title="Bioengineering Project-1 | Midterm Report", 
+    page_icon="🎓", 
     layout="wide", 
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for Full Page Frame & Single Content Block (Dark Mode Compatible)
+# Custom CSS for Full Page Frame & Cover Page Aesthetic
 st.markdown("""
     <style>
     .stApp {
         border: 12px solid;
         border-image: linear-gradient(45deg, #1E3A8A, #10B981) 1;
     }
-    .main-title {
-        font-size: 2.8rem; 
+    
+    /* Cover Page Typography */
+    .cover-container {
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 30px;
+        color: var(--text-color);
+    }
+    .cover-uni {
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        margin-bottom: 0px;
+        text-transform: uppercase;
+    }
+    .cover-dept {
+        font-size: 1.3rem;
+        font-weight: 600;
+        opacity: 0.85;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+    }
+    .cover-course {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #10B981;
+        margin-bottom: 30px;
+    }
+    .cover-title {
+        font-size: 2.2rem; 
         font-weight: 900; 
         background: -webkit-linear-gradient(45deg, #3B82F6, #10B981);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-align: center; 
-        margin-top: 20px;
-        margin-bottom: 40px; 
-        line-height: 1.2;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        line-height: 1.3;
+        margin-bottom: 40px;
+        padding: 0 20px;
     }
+    .cover-student {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 25px;
+    }
+    .cover-advisor {
+        font-size: 1.1rem;
+        font-weight: 500;
+        opacity: 0.85;
+        margin-bottom: 30px;
+    }
+
+    /* Unified Content Block for Abstract */
     .content-block {
         padding: 10px 40px;
         font-size: 1.15rem; 
@@ -40,7 +78,10 @@ st.markdown("""
         text-align: justify; 
         margin: 0 auto;
         max-width: 1000px;
+        border-top: 2px dashed rgba(156, 163, 175, 0.3);
+        padding-top: 30px;
     }
+    
     .qr-thanks {
         text-align: center; 
         font-size: 1.15rem;
@@ -68,14 +109,49 @@ def enter_simulator():
     st.session_state.page = 'simulator'
 
 # ==========================================
-# 1. LANDING PAGE
+# 1. LANDING PAGE (Formal Cover & Abstract)
 # ==========================================
 if st.session_state.page == 'landing':
     
-    st.markdown('<div class="main-title">Design and kinetic modeling of the <i>Lactiplantibacillus plantarum</i>: compare different strains with different kinetic parameters</div>', unsafe_allow_html=True)
+    # 1. Logo Bölümü (Orantılı şekilde merkeze yerleştirilir)
+    col_img1, col_img2, col_img3 = st.columns([4, 1.5, 4])
+    with col_img2:
+        if os.path.exists("marmara.png"):
+            st.image("marmara.png", use_container_width=True)
+            
+    # 2. Resmi Kapak Sayfası Metinleri
+    st.markdown("""
+    <div class="cover-container">
+        <div class="cover-uni">MARMARA UNIVERSITY<br>FACULTY OF ENGINEERING</div>
+        <div class="cover-dept">BIOENGINEERING DEPARTMENT</div>
+        
+        <div class="cover-course">
+            BIOE 4298.7<br>
+            Bioengineering Project-1<br>
+            Midterm Project Report
+        </div>
+        
+        <div class="cover-title">
+            “Design and kinetic modeling of the Lactiplantibacillus plantarum:<br>
+            compare different strains with different kinetic parameters”
+        </div>
+        
+        <div class="cover-student">
+            Mehmet Anıl Tipici<br>
+            150819054
+        </div>
+        
+        <div class="cover-advisor">
+            Submitted to:<br>
+            Prof. Dr. Nihat Alpagu SAYAR
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
+    # 3. Proje Özeti (Abstract)
     st.markdown("""
     <div class="content-block">
+        <b>Project Abstract:</b><br>
         This interactive digital twin was developed within the scope of a senior graduation project at the Bioengineering Department of Marmara University. The model was designed and engineered by Mehmet Anıl Tipici to bridge the gap between theoretical biological kinetics and industrial-scale chemical plant operations. 
         <br><br>
         Initially, the study was conceptualized to optimize the bioprocess parameters for a single, specific strain of <i>Lactiplantibacillus plantarum</i>. However, to provide a more robust and comprehensive engineering solution, the scope was significantly expanded. The current model was constructed to compare different strains possessing distinct kinetic parameters, allowing the evaluation of how varying biological potentials translate into industrial-scale lactic acid yield.
@@ -86,6 +162,7 @@ if st.session_state.page == 'landing':
     </div>
     """, unsafe_allow_html=True)
     
+    # Butonu merkeze hizalama
     col1, col2, col3 = st.columns([1.5, 1, 1.5])
     with col2:
         st.button("Launch Interactive Simulator", on_click=enter_simulator, type="primary", use_container_width=True)
@@ -147,7 +224,6 @@ elif st.session_state.page == 'simulator':
         st.markdown("#### KNN Algorithm Matching")
         st.caption("Your custom input is dynamically mapped to the nearest neighbor scenario in the database.")
         
-        # Kullanıcının girdiği değer ile algoritmanın bulduğu değeri kıyaslayan görsel kutu
         st.markdown(f"""
         <div class="knn-box">
             <b>Target μ_max:</b> {exp_mu:.2f} ➔ <i>Matched: {matched_row['mu_max_UserSpecified']:.3f}</i><br>
@@ -164,7 +240,6 @@ elif st.session_state.page == 'simulator':
         else:
             st.error(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
             
-        # Çıktının başına 'Yaklaşık (~)' işareti eklendi
         st.metric(label="Estimated Lactic Acid Production", value=f"~ {expected_output:.5f} kg/h")
         
     with col2:
