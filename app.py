@@ -12,21 +12,24 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for Full Page Frame & Single Content Block
+# Custom CSS for Full Page Frame & Single Content Block (Dark Mode Compatible)
 st.markdown("""
     <style>
     /* Add a colorful frame to the entire page margins */
     .stApp {
         border: 12px solid;
         border-image: linear-gradient(45deg, #1E3A8A, #10B981) 1;
-        background-color: #FFFFFF;
+        /* Arka plan rengi silindi, böylece karanlık/aydınlık temaya otomatik uyum sağlar */
     }
     
     /* Giant Prominent Title */
     .main-title {
         font-size: 2.8rem; 
         font-weight: 900; 
-        color: #1E3A8A; 
+        /* Karanlık ve aydınlık temada mükemmel okunan renk geçişi (Gradient) */
+        background: -webkit-linear-gradient(45deg, #3B82F6, #10B981);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-align: center; 
         margin-top: 20px;
         margin-bottom: 40px; 
@@ -35,13 +38,12 @@ st.markdown("""
         letter-spacing: 1px;
     }
     
-    /* Unified White Content Block */
+    /* Unified Content Block */
     .content-block {
-        background-color: #FFFFFF;
         padding: 10px 40px;
         font-size: 1.15rem; 
         line-height: 1.8; 
-        color: #1F2937; 
+        color: var(--text-color); /* Tema değiştiğinde yazıları otomatik Siyah/Beyaz yapar */
         text-align: justify; 
         margin: 0 auto;
         max-width: 1000px;
@@ -107,12 +109,10 @@ elif st.session_state.page == 'simulator':
 
     st.markdown('<h2 style="color: #1E3A8A; border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0;">Process Simulator & Efficiency Assessor</h2>', unsafe_allow_html=True)
     
-    # NaN hatasını çözen güncellenmiş fonksiyon
     @st.cache_data
     def load_data():
         try:
             temp_df = pd.read_excel('120_SuperPro_Input_List.xlsx')
-            # Excel'deki görünmez boş satırları temizler
             return temp_df.dropna(subset=['Screenshot_Index'])
         except FileNotFoundError:
             return None
@@ -167,7 +167,6 @@ elif st.session_state.page == 'simulator':
         
         if os.path.exists(image_file):
             img = Image.open(image_file)
-            # Genişlik 450'ye düşürülerek ekrana tam oturması sağlandı
             st.image(img, caption=f"System Configuration Output: {image_file}", width=450)
         else:
             st.error(f"Awaiting validation data: Image '{image_file}' is currently missing from the directory.")
