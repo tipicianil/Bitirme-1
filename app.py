@@ -18,27 +18,36 @@ st.markdown("""
     .stApp {
         border: 12px solid;
         border-image: linear-gradient(45deg, #1E3A8A, #10B981) 1;
+        background-color: transparent; /* Herhangi bir beyaz arka plan kalıntısını yok eder */
     }
     
-    /* Cover Page Typography */
+    /* Logo için Şık Beyaz Rozet (Karanlık temada beyaz arkaplanlı logoları kurtarır) */
+    .logo-container img {
+        background-color: white;
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    /* Cover Page Typography & Proper Spacing */
     .cover-container {
         text-align: center;
         margin-top: 10px;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
         color: var(--text-color);
     }
     .cover-uni {
         font-size: 1.6rem;
         font-weight: 800;
-        letter-spacing: 2px;
-        margin-bottom: 0px;
+        letter-spacing: 1.5px;
+        margin-bottom: 5px;
         text-transform: uppercase;
     }
     .cover-dept {
         font-size: 1.3rem;
         font-weight: 600;
-        opacity: 0.85;
-        margin-bottom: 20px;
+        opacity: 0.9;
+        margin-bottom: 30px;
         text-transform: uppercase;
     }
     .cover-course {
@@ -46,32 +55,35 @@ st.markdown("""
         font-weight: 700;
         color: #10B981;
         margin-bottom: 30px;
+        line-height: 1.5;
     }
     .cover-title {
-        font-size: 2.2rem; 
+        font-size: 2.1rem; 
         font-weight: 900; 
         background: -webkit-linear-gradient(45deg, #3B82F6, #10B981);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        line-height: 1.3;
+        line-height: 1.4;
         margin-bottom: 40px;
-        padding: 0 20px;
+        padding: 0 10%;
     }
     .cover-student {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
         font-weight: 800;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
+        line-height: 1.5;
     }
     .cover-advisor {
         font-size: 1.1rem;
         font-weight: 500;
-        opacity: 0.85;
-        margin-bottom: 30px;
+        opacity: 0.9;
+        margin-bottom: 20px;
+        line-height: 1.5;
     }
 
     /* Unified Content Block for Abstract */
     .content-block {
-        padding: 10px 40px;
+        padding: 20px 40px;
         font-size: 1.15rem; 
         line-height: 1.8; 
         color: var(--text-color); 
@@ -79,14 +91,13 @@ st.markdown("""
         margin: 0 auto;
         max-width: 1000px;
         border-top: 2px dashed rgba(156, 163, 175, 0.3);
-        padding-top: 30px;
     }
     
     .qr-thanks {
         text-align: center; 
         font-size: 1.15rem;
         color: #10B981; 
-        margin-top: 30px; 
+        margin-top: 40px; 
         margin-bottom: 30px;
         font-weight: 700; 
         font-style: italic;
@@ -113,13 +124,15 @@ def enter_simulator():
 # ==========================================
 if st.session_state.page == 'landing':
     
-    # 1. Logo Bölümü (Orantılı şekilde merkeze yerleştirilir)
-    col_img1, col_img2, col_img3 = st.columns([4, 1.5, 4])
+    # 1. Logo Bölümü (Oranlar küçültüldü: 4 - 1 - 4)
+    st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+    col_img1, col_img2, col_img3 = st.columns([4.5, 1.2, 4.5])
     with col_img2:
         if os.path.exists("marmara.png"):
             st.image("marmara.png", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
             
-    # 2. Resmi Kapak Sayfası Metinleri
+    # 2. Resmi Kapak Sayfası Metinleri (Aralıkları düzeltildi)
     st.markdown("""
     <div class="cover-container">
         <div class="cover-uni">MARMARA UNIVERSITY<br>FACULTY OF ENGINEERING</div>
