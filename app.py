@@ -46,16 +46,14 @@ st.markdown("""
 .cover-course {
     font-size: 1.15rem;
     font-weight: 700;
-    color: #10B981;
+    color: var(--text-color); /* Tema rengine duyarlı hale getirildi */
     margin-bottom: 30px;
     line-height: 1.5;
 }
 .cover-title {
     font-size: 2.1rem; 
     font-weight: 900; 
-    background: -webkit-linear-gradient(45deg, #3B82F6, #10B981);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-color); /* Renk geçişi iptal edildi, tema rengine bağlandı */
     line-height: 1.4;
     margin-bottom: 40px;
     padding: 0 10%;
@@ -89,7 +87,7 @@ st.markdown("""
 .qr-thanks {
     text-align: center; 
     font-size: 1.15rem;
-    color: #10B981; 
+    color: var(--text-color); /* Teşekkür yazısı da tema rengine uyarlandı */
     margin-top: 40px; 
     margin-bottom: 30px;
     font-weight: 700; 
@@ -117,7 +115,7 @@ def enter_simulator():
 # ==========================================
 if st.session_state.page == 'landing':
     
-    # 1. Logo Bölümü (Girintiler tamamen silindi)
+    # 1. Logo Bölümü
     if os.path.exists("marmara.png"):
         with open("marmara.png", "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode()
@@ -127,7 +125,7 @@ if st.session_state.page == 'landing':
 </div>"""
         st.markdown(logo_html, unsafe_allow_html=True)
             
-    # 2. Resmi Kapak Sayfası Metinleri (Girintiler silindi)
+    # 2. Resmi Kapak Sayfası Metinleri
     st.markdown("""<div class="cover-container">
 <div class="cover-uni">MARMARA UNIVERSITY<br>FACULTY OF ENGINEERING</div>
 <div class="cover-dept">BIOENGINEERING DEPARTMENT</div>
@@ -150,7 +148,7 @@ Prof. Dr. Nihat Alpagu SAYAR
 </div>
 </div>""", unsafe_allow_html=True)
     
-    # 3. Proje Özeti (Girintiler silindi)
+    # 3. Proje Özeti
     st.markdown("""<div class="content-block">
 <b>Project Abstract:</b><br>
 This interactive digital twin was developed within the scope of a senior graduation project at the Bioengineering Department of Marmara University. The model was designed and engineered by Mehmet Anıl Tipici to bridge the gap between theoretical biological kinetics and industrial-scale chemical plant operations. 
@@ -182,7 +180,7 @@ elif st.session_state.page == 'simulator':
     st.sidebar.warning("⚙️ **System Constraint:**\nReactor capacity is mathematically fixed at 90% Working Volume. Output varies solely based on strain kinetics.")
     st.sidebar.info("💡 **Algorithm Note:**\nThe KNN algorithm rounds your inputs to the closest pre-simulated industrial scenario in the database.")
 
-    st.markdown('<h2 style="color: #1E3A8A; border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0;">Process Simulator & Efficiency Assessor</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 style="color: var(--text-color); border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0;">Process Simulator & Efficiency Assessor</h2>', unsafe_allow_html=True)
     
     @st.cache_data
     def load_data():
