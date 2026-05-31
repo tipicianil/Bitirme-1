@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 import os
+import base64
 
 # --- PAGE CONFIGURATION & ACADEMIC THEME ---
 st.set_page_config(
@@ -19,14 +20,6 @@ st.markdown("""
         border: 12px solid;
         border-image: linear-gradient(45deg, #1E3A8A, #10B981) 1;
         background-color: transparent; 
-    }
-    
-    /* Logo için Güvenli Beyaz Rozet Stili */
-    [data-testid="stImage"] img {
-        background-color: white;
-        padding: 15px;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
     /* Cover Page Typography & Proper Spacing */
@@ -124,11 +117,17 @@ def enter_simulator():
 # ==========================================
 if st.session_state.page == 'landing':
     
-    # 1. Logo Bölümü (Temizlendi)
-    col_img1, col_img2, col_img3 = st.columns([4.5, 1.2, 4.5])
-    with col_img2:
-        if os.path.exists("marmara.png"):
-            st.image("marmara.png", use_container_width=True)
+    # 1. Logo Bölümü (Base64 ile Boyutu ve Arka Planı Kilitlendi)
+    if os.path.exists("marmara.png"):
+        with open("marmara.png", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+        
+        logo_html = f"""
+        <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+            <img src="data:image/png;base64,{encoded_string}" style="max-width: 160px; background-color: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        </div>
+        """
+        st.markdown(logo_html, unsafe_allow_html=True)
             
     # 2. Resmi Kapak Sayfası Metinleri
     st.markdown("""
