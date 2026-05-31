@@ -15,17 +15,13 @@ st.set_page_config(
 # Custom CSS for Full Page Frame & Single Content Block (Dark Mode Compatible)
 st.markdown("""
     <style>
-    /* Add a colorful frame to the entire page margins */
     .stApp {
         border: 12px solid;
         border-image: linear-gradient(45deg, #1E3A8A, #10B981) 1;
     }
-    
-    /* Giant Prominent Title */
     .main-title {
         font-size: 2.8rem; 
         font-weight: 900; 
-        /* Karanlık ve aydınlık temada mükemmel okunan renk geçişi (Gradient) */
         background: -webkit-linear-gradient(45deg, #3B82F6, #10B981);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -36,19 +32,15 @@ st.markdown("""
         text-transform: uppercase;
         letter-spacing: 1px;
     }
-    
-    /* Unified Content Block */
     .content-block {
         padding: 10px 40px;
         font-size: 1.15rem; 
         line-height: 1.8; 
-        color: var(--text-color); /* Tema değiştiğinde yazıları otomatik Siyah/Beyaz yapar */
+        color: var(--text-color); 
         text-align: justify; 
         margin: 0 auto;
         max-width: 1000px;
     }
-    
-    /* Thank You Text */
     .qr-thanks {
         text-align: center; 
         font-size: 1.15rem;
@@ -57,6 +49,13 @@ st.markdown("""
         margin-bottom: 30px;
         font-weight: 700; 
         font-style: italic;
+    }
+    .knn-box {
+        background-color: rgba(59, 130, 246, 0.1);
+        border-left: 4px solid #3B82F6;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -69,7 +68,7 @@ def enter_simulator():
     st.session_state.page = 'simulator'
 
 # ==========================================
-# 1. LANDING PAGE (Unified Article Style & Framed)
+# 1. LANDING PAGE
 # ==========================================
 if st.session_state.page == 'landing':
     
@@ -87,25 +86,24 @@ if st.session_state.page == 'landing':
     </div>
     """, unsafe_allow_html=True)
     
-    # Center the button
     col1, col2, col3 = st.columns([1.5, 1, 1.5])
     with col2:
         st.button("Launch Interactive Simulator", on_click=enter_simulator, type="primary", use_container_width=True)
 
 # ==========================================
-# 2. SIMULATOR PAGE (Compact Industrial Dashboard)
+# 2. SIMULATOR PAGE
 # ==========================================
 elif st.session_state.page == 'simulator':
     
     st.sidebar.title("Kinetic Input Parameters")
     st.sidebar.markdown("Define the experimental Monod data for the target strain.")
     
-    # μ_max maks 0.70, Ks maks 1.50 olarak güncellendi
     exp_mu = st.sidebar.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, 0.45, 0.01)
     exp_Ks = st.sidebar.slider("Half-Saturation (Ks) [g/L]", 0.01, 1.50, 0.50, 0.01)
     
     st.sidebar.markdown("---")
     st.sidebar.warning("⚙️ **System Constraint:**\nReactor capacity is mathematically fixed at 90% Working Volume. Output varies solely based on strain kinetics.")
+    st.sidebar.info("💡 **Algorithm Note:**\nThe KNN algorithm rounds your inputs to the closest pre-simulated industrial scenario in the database.")
 
     st.markdown('<h2 style="color: #1E3A8A; border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0;">Process Simulator & Efficiency Assessor</h2>', unsafe_allow_html=True)
     
@@ -124,7 +122,6 @@ elif st.session_state.page == 'simulator':
         st.stop()
 
     # --- KNN MATCHING ALGORITHM ---
-    # Normalizasyon formülü yeni sınır olan 1.50'ye göre güncellendi
     norm_mu = (df['mu_max_UserSpecified'] - exp_mu) / (0.70 - 0.10)
     norm_Ks = (df['Ks_K1'] - exp_Ks) / (1.50 - 0.01)
     
@@ -147,27 +144,35 @@ elif st.session_state.page == 'simulator':
     col1, col2 = st.columns([1.2, 2.8]) 
     
     with col1:
-        st.markdown("#### Performance Metrics")
+        st.markdown("#### KNN Algorithm Matching")
+        st.caption("Your custom input is dynamically mapped to the nearest neighbor scenario in the database.")
+        
+        # Kullanıcının girdiği değer ile algoritmanın bulduğu değeri kıyaslayan görsel kutu
+        st.markdown(f"""
+        <div class="knn-box">
+            <b>Target μ_max:</b> {exp_mu:.2f} ➔ <i>Matched: {matched_row['mu_max_UserSpecified']:.3f}</i><br>
+            <b>Target K_s:</b> {exp_Ks:.2f} ➔ <i>Matched: {matched_row['Ks_K1']:.3f}</i>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("#### Projected Performance")
         
         if efficiency_score >= 8.0:
-            st.success(f"**Efficiency Score:**\n### {efficiency_score:.1f} / 10.0")
+            st.success(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
         elif efficiency_score >= 4.0:
-            st.warning(f"**Efficiency Score:**\n### {efficiency_score:.1f} / 10.0")
+            st.warning(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
         else:
-            st.error(f"**Efficiency Score:**\n### {efficiency_score:.1f} / 10.0")
+            st.error(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
             
-        st.metric(label="Lactic Acid Production Rate", value=f"{expected_output:.5f} kg/h")
-        
-        st.markdown("---")
-        st.markdown("#### Matched Database Profile")
-        st.info(f"**Target μ_max:** {matched_row['mu_max_UserSpecified']:.3f} 1/h\n\n**Target Ks:** {matched_row['Ks_K1']:.3f} g/L")
+        # Çıktının başına 'Yaklaşık (~)' işareti eklendi
+        st.metric(label="Estimated Lactic Acid Production", value=f"~ {expected_output:.5f} kg/h")
         
     with col2:
-        st.markdown("#### SuperPro Designer Process Flowsheet")
+        st.markdown("#### Closest Matched Process Flowsheet (SuperPro Designer)")
         image_file = f"SuperPro_{image_index}.png"
         
         if os.path.exists(image_file):
             img = Image.open(image_file)
-            st.image(img, caption=f"System Configuration Output: {image_file}", width=450)
+            st.image(img, caption=f"Approximated System Configuration Output: {image_file}", width=450)
         else:
             st.error(f"Awaiting validation data: Image '{image_file}' is currently missing from the directory.")
