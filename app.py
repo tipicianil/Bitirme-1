@@ -158,12 +158,13 @@ elif st.session_state.page == 'simulator':
         st.markdown("#### Matched Database Profile")
         st.info(f"**Target μ_max:** {matched_row['mu_max_UserSpecified']:.3f} 1/h\n\n**Target Ks:** {matched_row['Ks_K1']:.3f} g/L")
         
-    with col2:
+   with col2:
         st.markdown("#### SuperPro Designer Process Flowsheet")
         image_file = f"SuperPro_{image_index}.png"
         
         if os.path.exists(image_file):
             img = Image.open(image_file)
-            st.image(img, caption=f"System Configuration Output: {image_file}", width=700)
+            # Genişlik 700'den 450'ye düşürüldü, böylece ekrana tam sığacak ve kaydırma gerektirmeyecek
+            st.image(img, caption=f"System Configuration Output: {image_file}", width=450)
         else:
             st.error(f"Awaiting validation data: Image '{image_file}' is currently missing from the directory.")
