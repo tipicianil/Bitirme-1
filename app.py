@@ -244,7 +244,7 @@ elif st.session_state.page == 'simulator':
     # ==========================================
 
     # --- ADIM 1 ---
-    st.button("⚙️ STEP 1: CSTR Reactor Input", use_container_width=True, 
+    st.button("⚙️ Enter Kinetic Parameters", use_container_width=True, 
               type="primary" if st.session_state.active_step == 'reactor' else "secondary",
               on_click=set_step, args=('reactor',))
               
@@ -260,7 +260,7 @@ elif st.session_state.page == 'simulator':
         st.markdown('</div>', unsafe_allow_html=True)
 
     # --- ADIM 2 ---
-    st.button("📊 STEP 2: Live Analytics", use_container_width=True, 
+    st.button("📊 Mathematical/Theoretical Calculations & Analytics", use_container_width=True, 
               type="primary" if st.session_state.active_step == 'analytics' else "secondary",
               on_click=set_step, args=('analytics',))
               
@@ -292,7 +292,7 @@ elif st.session_state.page == 'simulator':
         st.markdown('</div>', unsafe_allow_html=True)
 
     # --- ADIM 3 ---
-    st.button("🏭 STEP 3: SuperPro Output", use_container_width=True, 
+    st.button("🏭 SuperPro Designer Output", use_container_width=True, 
               type="primary" if st.session_state.active_step == 'output' else "secondary",
               on_click=set_step, args=('output',))
               
