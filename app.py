@@ -168,7 +168,7 @@ if st.session_state.page == 'landing':
 <div class="cover-course">
 BIOE 4298.7<br>
 Bioengineering Project-1<br>
-Midterm Project Report
+Project Report
 </div>
 <div class="cover-title">
 “Design and kinetic modeling of the Lactiplantibacillus plantarum:<br>
