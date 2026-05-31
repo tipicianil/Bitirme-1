@@ -107,12 +107,14 @@ elif st.session_state.page == 'simulator':
 
     st.markdown('<h2 style="color: #1E3A8A; border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0;">Process Simulator & Efficiency Assessor</h2>', unsafe_allow_html=True)
     
-    @st.cache_data
-    def load_data():
-        try:
-            return pd.read_excel('120_SuperPro_Input_List.xlsx')
-        except FileNotFoundError:
-            return None
+@st.cache_data
+ def load_data():
+     try:
+         temp_df = pd.read_excel('120_SuperPro_Input_List.xlsx')
+         # Excel'deki görünmez boş satırları (NaN) temizler
+         return temp_df.dropna(subset=['Screenshot_Index'])
+     except FileNotFoundError:
+         return None
 
     df = load_data()
     
