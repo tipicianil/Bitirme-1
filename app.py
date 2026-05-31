@@ -99,14 +99,28 @@ st.markdown("""
     padding: 15px;
     border-radius: 5px;
     margin-bottom: 20px;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
+}
+
+/* Ok İşaretleri İçin Stil */
+.process-arrow {
+    text-align: center;
+    font-size: 2rem;
+    color: #10B981;
+    line-height: 2;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# --- SESSION STATE FOR NAVIGATION ---
+# --- SESSION STATE FOR NAVIGATION & WORKFLOW ---
 if 'page' not in st.session_state:
     st.session_state.page = 'landing'
+if 'active_step' not in st.session_state:
+    st.session_state.active_step = 'reactor'
+if 'sim_mu' not in st.session_state:
+    st.session_state.sim_mu = 0.45
+if 'sim_Ks' not in st.session_state:
+    st.session_state.sim_Ks = 0.50
 
 def enter_simulator():
     st.session_state.page = 'simulator'
@@ -163,13 +177,37 @@ To achieve this objective, a Continuous Stirred-Tank Reactor (CSTR) model was ut
         st.button("Launch Interactive Simulator", on_click=enter_simulator, type="primary", use_container_width=True)
 
 # ==========================================
-# 2. SIMULATOR PAGE (3-Step Control Panel)
+# 2. SIMULATOR PAGE (Interactive Process Flow)
 # ==========================================
 elif st.session_state.page == 'simulator':
     
     st.markdown('<h2 style="color: var(--text-color); border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0; text-align: center;">Interactive Bioprocess Control Panel</h2>', unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
     
+    # --- İNTERAKTİF SÜREÇ BUTONLARI (FLOWCHART SİMÜLASYONU) ---
+    st.markdown("<br>", unsafe_allow_html=True)
+    btn_col1, arr_col1, btn_col2, arr_col2, btn_col3 = st.columns([3, 1, 3, 1, 3])
+    
+    with btn_col1:
+        if st.button("⚙️ STEP 1: CSTR Reactor Input", use_container_width=True, type="primary" if st.session_state.active_step == 'reactor' else "secondary"):
+            st.session_state.active_step = 'reactor'
+    
+    with arr_col1:
+        st.markdown('<div class="process-arrow">➔</div>', unsafe_allow_html=True)
+        
+    with btn_col2:
+        if st.button("📊 STEP 2: Live Analytics", use_container_width=True, type="primary" if st.session_state.active_step == 'analytics' else "secondary"):
+            st.session_state.active_step = 'analytics'
+            
+    with arr_col2:
+        st.markdown('<div class="process-arrow">➔</div>', unsafe_allow_html=True)
+        
+    with btn_col3:
+        if st.button("🏭 STEP 3: SuperPro Output", use_container_width=True, type="primary" if st.session_state.active_step == 'output' else "secondary"):
+            st.session_state.active_step = 'output'
+            
+    st.markdown("---")
+
+    # --- VERİ VE KNN ALGORİTMASI HAZIRLIĞI ---
     @st.cache_data
     def load_data():
         try:
@@ -179,28 +217,12 @@ elif st.session_state.page == 'simulator':
             return None
 
     df = load_data()
-    
     if df is None:
-        st.error("System Error: '120_SuperPro_Input_List.xlsx' database file is missing from the directory.")
+        st.error("System Error: '120_SuperPro_Input_List.xlsx' database file is missing.")
         st.stop()
 
-    # Sayfayı 3 ana sütuna (Aşamalara) bölüyoruz
-    col_input, col_metrics, col_output = st.columns([1.2, 1.2, 2.6]) 
-
-    # --- ADIM 1: REAKTÖR GİRDİLERİ ---
-    with col_input:
-        st.markdown("### ⚙️ STEP 1\n**Reactor Kinetics**")
-        st.caption("Adjust the experimental Monod data for the target strain.")
-        
-        exp_mu = st.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, 0.45, 0.01)
-        exp_Ks = st.slider("Half-Saturation (Ks) [g/L]", 0.01, 1.50, 0.50, 0.01)
-        
-        st.markdown("---")
-        st.warning("🔒 **Fixed Constraint:**\nCSTR capacity operates at 90% Working Volume.")
-
-    # --- KNN MATCHING ALGORITHM ---
-    norm_mu = (df['mu_max_UserSpecified'] - exp_mu) / (0.70 - 0.10)
-    norm_Ks = (df['Ks_K1'] - exp_Ks) / (1.50 - 0.01)
+    norm_mu = (df['mu_max_UserSpecified'] - st.session_state.sim_mu) / (0.70 - 0.10)
+    norm_Ks = (df['Ks_K1'] - st.session_state.sim_Ks) / (1.50 - 0.01)
     
     df['Distance'] = np.sqrt(norm_mu**2 + norm_Ks**2)
     matched_idx = df['Distance'].idxmin()
@@ -213,34 +235,53 @@ elif st.session_state.page == 'simulator':
     efficiency_score = 1.0 + (scale_factor * 9.0)
     expected_output = worst_output_kgh + (scale_factor * (best_output_kgh - worst_output_kgh))
 
-    # --- ADIM 2: CANLI ANALİZ ---
-    with col_metrics:
-        st.markdown("### 📊 STEP 2\n**Live Analytics**")
-        st.caption("Algorithm mapping to the nearest database scenario.")
+    # --- SEÇİLEN AŞAMAYA GÖRE EKRANI GÜNCELLEME ---
+    
+    # ADIM 1: REAKTÖR GİRDİLERİ
+    if st.session_state.active_step == 'reactor':
+        st.markdown("### Control Panel: Strain Kinetics")
+        st.info("Adjust the experimental Monod parameters. The system will automatically calculate the nearest industrial scenario.")
         
-        st.markdown(f"""<div class="knn-box">
-<b>Target μ_max:</b> {exp_mu:.2f} ➔ <i>Matched: {matched_row['mu_max_UserSpecified']:.3f}</i><br>
-<b>Target K_s:</b> {exp_Ks:.2f} ➔ <i>Matched: {matched_row['Ks_K1']:.3f}</i>
-</div>""", unsafe_allow_html=True)
+        # Değerler değiştirildiğinde session_state'e kaydedilir
+        new_mu = st.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, st.session_state.sim_mu, 0.01)
+        new_Ks = st.slider("Half-Saturation (Ks) [g/L]", 0.01, 1.50, st.session_state.sim_Ks, 0.01)
         
-        if efficiency_score >= 8.0:
-            st.success(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
-        elif efficiency_score >= 4.0:
-            st.warning(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
-        else:
-            st.error(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
-            
-        st.metric(label="Estimated Lactic Acid Output", value=f"~ {expected_output:.5f} kg/h")
+        st.session_state.sim_mu = new_mu
+        st.session_state.sim_Ks = new_Ks
+        
+        st.warning("🔒 **Fixed Constraint:** CSTR capacity mathematically bounded to 90% Working Volume.")
 
-    # --- ADIM 3: SUPERPRO ÇIKTISI ---
-    with col_output:
-        st.markdown("### 🏭 STEP 3\n**SuperPro Flowsheet**")
-        st.caption("Calibrated industrial plant simulation output.")
+    # ADIM 2: CANLI ANALİZ
+    elif st.session_state.active_step == 'analytics':
+        st.markdown("### Process Analytics")
+        col_m1, col_m2 = st.columns([1, 1])
+        
+        with col_m1:
+            st.markdown("#### Database Matching Log")
+            st.markdown(f"""<div class="knn-box">
+            <b>Your Target μ_max:</b> {st.session_state.sim_mu:.2f} ➔ <i>System Matched: {matched_row['mu_max_UserSpecified']:.3f}</i><br><br>
+            <b>Your Target K_s:</b> {st.session_state.sim_Ks:.2f} ➔ <i>System Matched: {matched_row['Ks_K1']:.3f}</i>
+            </div>""", unsafe_allow_html=True)
+            
+        with col_m2:
+            st.markdown("#### Projected Efficiency")
+            if efficiency_score >= 8.0:
+                st.success(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
+            elif efficiency_score >= 4.0:
+                st.warning(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
+            else:
+                st.error(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
+                
+            st.metric(label="Estimated Lactic Acid Output", value=f"~ {expected_output:.5f} kg/h")
+
+    # ADIM 3: SUPERPRO ÇIKTISI
+    elif st.session_state.active_step == 'output':
+        st.markdown("### Retrieved SuperPro Designer Flowsheet")
+        st.caption(f"Displaying Process File: SuperPro_{image_index}.png")
         
         image_file = f"SuperPro_{image_index}.png"
-        
         if os.path.exists(image_file):
             img = Image.open(image_file)
-            st.image(img, width=480) # Ekranı taşırmayacak genişlik
+            st.image(img, use_container_width=True) 
         else:
             st.error(f"Awaiting validation data: Image '{image_file}' is currently missing from the directory.")
