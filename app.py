@@ -13,13 +13,33 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for Full Page Frame & Cover Page Aesthetic
+# Custom CSS for Full Page Frame, Cover Page & RED Buttons
 st.markdown("""
 <style>
 .stApp {
     border: 12px solid;
     border-image: linear-gradient(45deg, #1E3A8A, #10B981) 1;
     background-color: transparent; 
+}
+
+/* KESİN KIRMIZI AKTİF BUTON (PRIMARY) STİLİ */
+button[kind="primary"] {
+    background-color: #EF4444 !important; /* Tam Kırmızı */
+    border-color: #EF4444 !important;
+    color: white !important;
+    font-weight: 800 !important;
+    font-size: 1.1rem !important;
+    transition: all 0.3s ease;
+}
+button[kind="primary"]:hover {
+    background-color: #DC2626 !important; /* Üzerine gelince biraz daha koyu kırmızı */
+    border-color: #DC2626 !important;
+}
+
+/* İkincil (Pasif) Buton Stili */
+button[kind="secondary"] {
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
 }
 
 /* Cover Page Typography & Proper Spacing */
@@ -96,18 +116,18 @@ st.markdown("""
 .knn-box {
     background-color: rgba(59, 130, 246, 0.05);
     border-left: 4px solid #3B82F6;
-    padding: 15px;
-    border-radius: 5px;
+    padding: 20px;
+    border-radius: 8px;
     margin-bottom: 20px;
     font-size: 1.1rem;
 }
-
-/* Ok İşaretleri İçin Stil */
-.process-arrow {
-    text-align: center;
-    font-size: 2rem;
-    color: #10B981;
-    line-height: 2;
+.step-container {
+    padding: 20px;
+    background-color: rgba(0,0,0,0.02);
+    border-radius: 0 0 10px 10px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(156, 163, 175, 0.2);
+    border-top: none;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -124,6 +144,9 @@ if 'sim_Ks' not in st.session_state:
 
 def enter_simulator():
     st.session_state.page = 'simulator'
+
+def set_step(step):
+    st.session_state.active_step = step
 
 # ==========================================
 # 1. LANDING PAGE (Formal Cover & Abstract)
@@ -177,36 +200,13 @@ To achieve this objective, a Continuous Stirred-Tank Reactor (CSTR) model was ut
         st.button("Launch Interactive Simulator", on_click=enter_simulator, type="primary", use_container_width=True)
 
 # ==========================================
-# 2. SIMULATOR PAGE (Interactive Process Flow)
+# 2. SIMULATOR PAGE (Accordion Process Flow)
 # ==========================================
 elif st.session_state.page == 'simulator':
     
     st.markdown('<h2 style="color: var(--text-color); border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0; text-align: center;">Interactive Bioprocess Control Panel</h2>', unsafe_allow_html=True)
-    
-    # --- İNTERAKTİF SÜREÇ BUTONLARI (FLOWCHART SİMÜLASYONU) ---
     st.markdown("<br>", unsafe_allow_html=True)
-    btn_col1, arr_col1, btn_col2, arr_col2, btn_col3 = st.columns([3, 1, 3, 1, 3])
     
-    with btn_col1:
-        if st.button("⚙️ STEP 1: CSTR Reactor Input", use_container_width=True, type="primary" if st.session_state.active_step == 'reactor' else "secondary"):
-            st.session_state.active_step = 'reactor'
-    
-    with arr_col1:
-        st.markdown('<div class="process-arrow">➔</div>', unsafe_allow_html=True)
-        
-    with btn_col2:
-        if st.button("📊 STEP 2: Live Analytics", use_container_width=True, type="primary" if st.session_state.active_step == 'analytics' else "secondary"):
-            st.session_state.active_step = 'analytics'
-            
-    with arr_col2:
-        st.markdown('<div class="process-arrow">➔</div>', unsafe_allow_html=True)
-        
-    with btn_col3:
-        if st.button("🏭 STEP 3: SuperPro Output", use_container_width=True, type="primary" if st.session_state.active_step == 'output' else "secondary"):
-            st.session_state.active_step = 'output'
-            
-    st.markdown("---")
-
     # --- VERİ VE KNN ALGORİTMASI HAZIRLIĞI ---
     @st.cache_data
     def load_data():
@@ -221,8 +221,12 @@ elif st.session_state.page == 'simulator':
         st.error("System Error: '120_SuperPro_Input_List.xlsx' database file is missing.")
         st.stop()
 
-    norm_mu = (df['mu_max_UserSpecified'] - st.session_state.sim_mu) / (0.70 - 0.10)
-    norm_Ks = (df['Ks_K1'] - st.session_state.sim_Ks) / (1.50 - 0.01)
+    # Session state'teki değerleri çekip arka planda matematiği çözüyoruz
+    exp_mu = st.session_state.sim_mu
+    exp_Ks = st.session_state.sim_Ks
+
+    norm_mu = (df['mu_max_UserSpecified'] - exp_mu) / (0.70 - 0.10)
+    norm_Ks = (df['Ks_K1'] - exp_Ks) / (1.50 - 0.01)
     
     df['Distance'] = np.sqrt(norm_mu**2 + norm_Ks**2)
     matched_idx = df['Distance'].idxmin()
@@ -235,32 +239,41 @@ elif st.session_state.page == 'simulator':
     efficiency_score = 1.0 + (scale_factor * 9.0)
     expected_output = worst_output_kgh + (scale_factor * (best_output_kgh - worst_output_kgh))
 
-    # --- SEÇİLEN AŞAMAYA GÖRE EKRANI GÜNCELLEME ---
-    
-    # ADIM 1: REAKTÖR GİRDİLERİ
+    # ==========================================
+    # AKORDEON DÜZENİ (BUTON -> İÇERİK -> BUTON)
+    # ==========================================
+
+    # --- ADIM 1 ---
+    st.button("⚙️ STEP 1: CSTR Reactor Input", use_container_width=True, 
+              type="primary" if st.session_state.active_step == 'reactor' else "secondary",
+              on_click=set_step, args=('reactor',))
+              
     if st.session_state.active_step == 'reactor':
-        st.markdown("### Control Panel: Strain Kinetics")
+        st.markdown('<div class="step-container">', unsafe_allow_html=True)
+        st.markdown("#### Control Panel: Strain Kinetics")
         st.info("Adjust the experimental Monod parameters. The system will automatically calculate the nearest industrial scenario.")
         
-        # Değerler değiştirildiğinde session_state'e kaydedilir
-        new_mu = st.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, st.session_state.sim_mu, 0.01)
-        new_Ks = st.slider("Half-Saturation (Ks) [g/L]", 0.01, 1.50, st.session_state.sim_Ks, 0.01)
-        
-        st.session_state.sim_mu = new_mu
-        st.session_state.sim_Ks = new_Ks
+        # Değerler değiştirildiğinde doğrudan session_state güncellenir
+        st.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, key="sim_mu", step=0.01)
+        st.slider("Half-Saturation (Ks) [g/L]", 0.01, 1.50, key="sim_Ks", step=0.01)
         
         st.warning("🔒 **Fixed Constraint:** CSTR capacity mathematically bounded to 90% Working Volume.")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    # ADIM 2: CANLI ANALİZ
-    elif st.session_state.active_step == 'analytics':
-        st.markdown("### Process Analytics")
+    # --- ADIM 2 ---
+    st.button("📊 STEP 2: Live Analytics", use_container_width=True, 
+              type="primary" if st.session_state.active_step == 'analytics' else "secondary",
+              on_click=set_step, args=('analytics',))
+              
+    if st.session_state.active_step == 'analytics':
+        st.markdown('<div class="step-container">', unsafe_allow_html=True)
         col_m1, col_m2 = st.columns([1, 1])
         
         with col_m1:
             st.markdown("#### Database Matching Log")
             st.markdown(f"""<div class="knn-box">
-            <b>Your Target μ_max:</b> {st.session_state.sim_mu:.2f} ➔ <i>System Matched: {matched_row['mu_max_UserSpecified']:.3f}</i><br><br>
-            <b>Your Target K_s:</b> {st.session_state.sim_Ks:.2f} ➔ <i>System Matched: {matched_row['Ks_K1']:.3f}</i>
+            <b>Your Target μ_max:</b> {exp_mu:.2f} ➔ <i>System Matched: {matched_row['mu_max_UserSpecified']:.3f}</i><br><br>
+            <b>Your Target K_s:</b> {exp_Ks:.2f} ➔ <i>System Matched: {matched_row['Ks_K1']:.3f}</i>
             </div>""", unsafe_allow_html=True)
             
         with col_m2:
@@ -273,10 +286,16 @@ elif st.session_state.page == 'simulator':
                 st.error(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
                 
             st.metric(label="Estimated Lactic Acid Output", value=f"~ {expected_output:.5f} kg/h")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    # ADIM 3: SUPERPRO ÇIKTISI
-    elif st.session_state.active_step == 'output':
-        st.markdown("### Retrieved SuperPro Designer Flowsheet")
+    # --- ADIM 3 ---
+    st.button("🏭 STEP 3: SuperPro Output", use_container_width=True, 
+              type="primary" if st.session_state.active_step == 'output' else "secondary",
+              on_click=set_step, args=('output',))
+              
+    if st.session_state.active_step == 'output':
+        st.markdown('<div class="step-container">', unsafe_allow_html=True)
+        st.markdown("#### Retrieved SuperPro Designer Flowsheet")
         st.caption(f"Displaying Process File: SuperPro_{image_index}.png")
         
         image_file = f"SuperPro_{image_index}.png"
@@ -285,3 +304,4 @@ elif st.session_state.page == 'simulator':
             st.image(img, use_container_width=True) 
         else:
             st.error(f"Awaiting validation data: Image '{image_file}' is currently missing from the directory.")
+        st.markdown('</div>', unsafe_allow_html=True)
