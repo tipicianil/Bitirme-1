@@ -100,9 +100,9 @@ elif st.session_state.page == 'simulator':
     st.sidebar.title("Kinetic Input Parameters")
     st.sidebar.markdown("Define the experimental Monod data for the target strain.")
     
-    # μ_max değeri maksimum 0.70 olarak güncellendi
+    # μ_max maks 0.70, Ks maks 1.50 olarak güncellendi
     exp_mu = st.sidebar.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, 0.45, 0.01)
-    exp_Ks = st.sidebar.slider("Half-Saturation (Ks) [g/L]", 0.01, 2.00, 0.50, 0.01)
+    exp_Ks = st.sidebar.slider("Half-Saturation (Ks) [g/L]", 0.01, 1.50, 0.50, 0.01)
     
     st.sidebar.markdown("---")
     st.sidebar.warning("⚙️ **System Constraint:**\nReactor capacity is mathematically fixed at 90% Working Volume. Output varies solely based on strain kinetics.")
@@ -124,9 +124,9 @@ elif st.session_state.page == 'simulator':
         st.stop()
 
     # --- KNN MATCHING ALGORITHM ---
-    # Normalizasyon formülü yeni sınır olan 0.70'e göre güncellendi
+    # Normalizasyon formülü yeni sınır olan 1.50'ye göre güncellendi
     norm_mu = (df['mu_max_UserSpecified'] - exp_mu) / (0.70 - 0.10)
-    norm_Ks = (df['Ks_K1'] - exp_Ks) / (2.00 - 0.01)
+    norm_Ks = (df['Ks_K1'] - exp_Ks) / (1.50 - 0.01)
     
     df['Distance'] = np.sqrt(norm_mu**2 + norm_Ks**2)
     matched_idx = df['Distance'].idxmin()
