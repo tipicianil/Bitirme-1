@@ -292,19 +292,17 @@ elif st.session_state.page == 'simulator':
         st.markdown('</div>', unsafe_allow_html=True)
 
     # --- ADIM 3 ---
+    # ADIM 3
     st.button("🏭 SuperPro Designer Output", use_container_width=True, 
               type="primary" if st.session_state.active_step == 'output' else "secondary",
               on_click=set_step, args=('output',))
-              
     if st.session_state.active_step == 'output':
         st.markdown('<div class="step-container">', unsafe_allow_html=True)
         st.markdown("#### Retrieved SuperPro Designer Flowsheet")
-        st.caption(f"Displaying Process File: SuperPro_{image_index}.png")
-        
         image_file = f"SuperPro_{image_index}.png"
         if os.path.exists(image_file):
-            img = Image.open(image_file)
-            st.image(img, use_container_width=True) 
+            # Buradaki 'width' değerini 500-600 aralığında tutarak akordeon içine sığdırıyoruz
+            st.image(image_file, width=600, caption=f"Process Flow: {image_file}") 
         else:
-            st.error(f"Awaiting validation data: Image '{image_file}' is currently missing from the directory.")
+            st.error("Image file missing.")
         st.markdown('</div>', unsafe_allow_html=True)
