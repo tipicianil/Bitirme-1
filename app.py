@@ -19,7 +19,6 @@ st.markdown("""
     .stApp {
         border: 12px solid;
         border-image: linear-gradient(45deg, #1E3A8A, #10B981) 1;
-        /* Arka plan rengi silindi, böylece karanlık/aydınlık temaya otomatik uyum sağlar */
     }
     
     /* Giant Prominent Title */
@@ -101,7 +100,8 @@ elif st.session_state.page == 'simulator':
     st.sidebar.title("Kinetic Input Parameters")
     st.sidebar.markdown("Define the experimental Monod data for the target strain.")
     
-    exp_mu = st.sidebar.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 1.00, 0.45, 0.01)
+    # μ_max değeri maksimum 0.70 olarak güncellendi
+    exp_mu = st.sidebar.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, 0.45, 0.01)
     exp_Ks = st.sidebar.slider("Half-Saturation (Ks) [g/L]", 0.01, 2.00, 0.50, 0.01)
     
     st.sidebar.markdown("---")
@@ -124,7 +124,8 @@ elif st.session_state.page == 'simulator':
         st.stop()
 
     # --- KNN MATCHING ALGORITHM ---
-    norm_mu = (df['mu_max_UserSpecified'] - exp_mu) / (1.00 - 0.10)
+    # Normalizasyon formülü yeni sınır olan 0.70'e göre güncellendi
+    norm_mu = (df['mu_max_UserSpecified'] - exp_mu) / (0.70 - 0.10)
     norm_Ks = (df['Ks_K1'] - exp_Ks) / (2.00 - 0.01)
     
     df['Distance'] = np.sqrt(norm_mu**2 + norm_Ks**2)
