@@ -291,7 +291,6 @@ elif st.session_state.page == 'simulator':
                 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- ADIM 3 ---
     # ADIM 3
     st.button("🏭 SuperPro Designer Output", use_container_width=True, 
               type="primary" if st.session_state.active_step == 'output' else "secondary",
@@ -299,10 +298,15 @@ elif st.session_state.page == 'simulator':
     if st.session_state.active_step == 'output':
         st.markdown('<div class="step-container">', unsafe_allow_html=True)
         st.markdown("#### Retrieved SuperPro Designer Flowsheet")
+        
         image_file = f"SuperPro_{image_index}.png"
         if os.path.exists(image_file):
-            # Buradaki 'width' değerini 500-600 aralığında tutarak akordeon içine sığdırıyoruz
-            st.image(image_file, width=600, caption=f"Process Flow: {image_file}") 
+            # Görseli tam merkeze alan HTML/CSS bloğu
+            st.markdown(f"""
+            <div style="display: flex; justify-content: center; margin-top: 20px; margin-bottom: 20px;">
+                <img src="data:image/png;base64,{base64.b64encode(open(image_file, 'rb').read()).decode()}" width="600" style="border: 1px solid #ccc; border-radius: 5px;">
+            </div>
+            """, unsafe_allow_html=True)
         else:
             st.error("Image file missing.")
         st.markdown('</div>', unsafe_allow_html=True)
