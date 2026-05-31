@@ -107,14 +107,15 @@ elif st.session_state.page == 'simulator':
 
     st.markdown('<h2 style="color: #1E3A8A; border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0;">Process Simulator & Efficiency Assessor</h2>', unsafe_allow_html=True)
     
-@st.cache_data
- def load_data():
-     try:
-         temp_df = pd.read_excel('120_SuperPro_Input_List.xlsx')
-         # Excel'deki görünmez boş satırları (NaN) temizler
-         return temp_df.dropna(subset=['Screenshot_Index'])
-     except FileNotFoundError:
-         return None
+    # NaN hatasını çözen güncellenmiş fonksiyon
+    @st.cache_data
+    def load_data():
+        try:
+            temp_df = pd.read_excel('120_SuperPro_Input_List.xlsx')
+            # Excel'deki görünmez boş satırları temizler
+            return temp_df.dropna(subset=['Screenshot_Index'])
+        except FileNotFoundError:
+            return None
 
     df = load_data()
     
@@ -160,13 +161,13 @@ elif st.session_state.page == 'simulator':
         st.markdown("#### Matched Database Profile")
         st.info(f"**Target μ_max:** {matched_row['mu_max_UserSpecified']:.3f} 1/h\n\n**Target Ks:** {matched_row['Ks_K1']:.3f} g/L")
         
-   with col2:
+    with col2:
         st.markdown("#### SuperPro Designer Process Flowsheet")
         image_file = f"SuperPro_{image_index}.png"
         
         if os.path.exists(image_file):
             img = Image.open(image_file)
-            # Genişlik 700'den 450'ye düşürüldü, böylece ekrana tam sığacak ve kaydırma gerektirmeyecek
+            # Genişlik 450'ye düşürülerek ekrana tam oturması sağlandı
             st.image(img, caption=f"System Configuration Output: {image_file}", width=450)
         else:
             st.error(f"Awaiting validation data: Image '{image_file}' is currently missing from the directory.")
