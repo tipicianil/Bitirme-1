@@ -42,6 +42,77 @@ button[kind="secondary"] {
     font-size: 1.1rem !important;
 }
 
+/* Cover Page Typography & Proper Spacing */
+.cover-container {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 40px;
+    color: var(--text-color);
+}
+.cover-uni {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+.cover-dept {
+    font-size: 1.3rem;
+    font-weight: 600;
+    opacity: 0.9;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+}
+.cover-course {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+.cover-title {
+    font-size: 2.1rem; 
+    font-weight: 900; 
+    color: var(--text-color);
+    line-height: 1.4;
+    margin-bottom: 40px;
+    padding: 0 10%;
+}
+.cover-student {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+.cover-advisor {
+    font-size: 1.1rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+/* Unified Content Block for Abstract */
+.content-block {
+    padding: 20px 40px;
+    font-size: 1.15rem; 
+    line-height: 1.8; 
+    color: var(--text-color); 
+    text-align: justify; 
+    margin: 0 auto;
+    max-width: 1000px;
+    border-top: 2px dashed rgba(156, 163, 175, 0.3);
+}
+
+.qr-thanks {
+    text-align: center; 
+    font-size: 1.15rem;
+    color: var(--text-color);
+    margin-top: 40px; 
+    margin-bottom: 30px;
+    font-weight: 700; 
+    font-style: italic;
+}
 .knn-box {
     background-color: rgba(59, 130, 246, 0.05);
     border-left: 4px solid #3B82F6;
@@ -61,13 +132,13 @@ button[kind="secondary"] {
 </style>
 """, unsafe_allow_html=True)
 
-# --- SESSION STATE (GÜÇLENDİRİLMİŞ HAFIZA) ---
+# --- SESSION STATE ---
 if 'page' not in st.session_state:
     st.session_state.page = 'landing'
 if 'active_step' not in st.session_state:
     st.session_state.active_step = 'reactor'
 
-# Değerleri saklayacağımız GİZLİ KASALAR
+# Slider değerlerini hafızada tutuyoruz
 if 'stored_mu' not in st.session_state:
     st.session_state.stored_mu = 0.45
 if 'stored_Ks' not in st.session_state:
@@ -79,7 +150,6 @@ def enter_simulator():
 def set_step(step):
     st.session_state.active_step = step
 
-# Slider oynatıldığı an değerleri kasaya kaydeden fonksiyon
 def update_kinetics():
     st.session_state.stored_mu = st.session_state.temp_mu
     st.session_state.stored_Ks = st.session_state.temp_Ks
@@ -120,14 +190,35 @@ Prof. Dr. Nihat Alpagu SAYAR
 </div>
 </div>""", unsafe_allow_html=True)
     
+    # METİN, MADDELER VE YENİ GÖRSEL BURADA:
     st.markdown("""<div class="content-block">
-<b>Project Abstract:</b><br>
-This interactive digital twin was developed within the scope of a senior graduation project at the Bioengineering Department of Marmara University. The model was designed and engineered by Mehmet Anıl Tipici to bridge the gap between theoretical biological kinetics and industrial-scale chemical plant operations. 
+<b>Project Abstract & Evolution:</b><br>
+This interactive digital twin was developed within the scope of a senior graduation project at the Bioengineering Department of Marmara University. Engineered by Mehmet Anıl Tipici, this platform bridges the gap between theoretical biological kinetics and industrial-scale chemical plant operations. 
 <br><br>
-Initially, the study was conceptualized to optimize the bioprocess parameters for a single, specific strain of <i>Lactiplantibacillus plantarum</i>. However, to provide a more robust and comprehensive engineering solution, the scope was significantly expanded. The current model was constructed to compare different strains possessing distinct kinetic parameters, allowing the evaluation of how varying biological potentials translate into industrial-scale lactic acid yield.
-<br><br>
-To achieve this objective, a Continuous Stirred-Tank Reactor (CSTR) model was utilized, strictly constrained to operate at a <b>90% working-to-vessel volume ratio</b>. Experimental Monod kinetic data—namely, the Maximum Specific Growth Rate (μ_max) and the Half-Saturation Constant (K_s)—can be inputted into the system. The backend algorithm employs a K-Nearest Neighbors (KNN) approach to evaluate these inputs against a comprehensive database of pre-simulated industrial configurations. Ultimately, the system aims to assign a standardized efficiency score and retrieve the precise, calibrated <b>SuperPro Designer</b> process output for the user.
-<br><br>
+<b>Project Milestones:</b>
+<ul>
+    <li style="margin-bottom: 10px;"><b>Foundation & Waste Valorization:</b> The study initially aimed to design a sustainable, closed-loop bioprocess for converting organic food waste into lactic acid—a crucial precursor for PLA bioplastics—using <i>Lactiplantibacillus plantarum</i>.</li>
+    <li style="margin-bottom: 10px;"><b>Process Re-engineering:</b> During the early design stages, a Batch Processing topology was investigated. However, due to synchronization latency and software constraints within SuperPro Designer, the plant configuration was strategically re-engineered into a Continuous Flow (CSTR) model to ensure steady-state stability.</li>
+    <li style="margin-bottom: 10px;"><b>The Digital Twin Expansion:</b> Building upon the successful continuous process model, the project's vision significantly expanded. Instead of limiting the simulation to a single microbial strain, the scope shifted to evaluating and comparing multiple strains with distinct kinetic potentials.</li>
+    <li><b>Interactive Kinetic Simulation:</b> The current platform utilizes a K-Nearest Neighbors (KNN) machine learning algorithm. It actively maps user-defined Monod kinetics (Max Growth Rate and Half-Saturation) against a comprehensive database of 120 pre-simulated industrial configurations, delivering real-time efficiency assessments and precise SuperPro Designer flowsheets.</li>
+</ul>
+<br>
+<h4 style="text-align: center; margin-bottom: 20px;">Overall Process Flow Diagram</h4>
+</div>""", unsafe_allow_html=True)
+
+    # İLK SAYFAYA GÖRSEL EKLEME KISMI
+    # Lütfen sunuma eklemek istediğin process resminin adını aşağıya doğru yaz (şu an 'image_0d8649.png' olarak varsaydım)
+    process_image_path = "image_0d8649.png" 
+    if os.path.exists(process_image_path):
+        st.markdown(f"""
+        <div style="display: flex; justify-content: center; margin-bottom: 30px;">
+            <img src="data:image/png;base64,{base64.b64encode(open(process_image_path, 'rb').read()).decode()}" width="800" style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; background-color: white;">
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f'<p style="text-align:center; color:red;">Process Flow image ({process_image_path}) not found. Please upload it to your folder.</p>', unsafe_allow_html=True)
+
+    st.markdown("""<div class="content-block">
 <div class="qr-thanks">Special thanks are extended to the jury members and attendees for scanning the QR code and exploring the details of this graduation project.</div>
 </div>""", unsafe_allow_html=True)
     
@@ -141,6 +232,7 @@ To achieve this objective, a Continuous Stirred-Tank Reactor (CSTR) model was ut
 elif st.session_state.page == 'simulator':
     
     st.markdown('<h2 style="text-align: center;">Interactive Bioprocess Control Panel</h2>', unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
     
     @st.cache_data
     def load_data():
@@ -152,10 +244,9 @@ elif st.session_state.page == 'simulator':
 
     df = load_data()
     if df is None:
-        st.error("System Error: Database file missing.")
+        st.error("System Error: '120_SuperPro_Input_List.xlsx' database file is missing.")
         st.stop()
 
-    # Sistemin matematiği artık doğrudan GİZLİ KASADAN (stored) okuyor
     exp_mu = st.session_state.stored_mu
     exp_Ks = st.session_state.stored_Ks
 
@@ -179,7 +270,6 @@ elif st.session_state.page == 'simulator':
               
     if st.session_state.active_step == 'reactor':
         st.markdown('<div class="step-container">', unsafe_allow_html=True)
-        # on_change ile kullanıcı sliderı bıraktığı an değerler kasaya gider
         st.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, 
                   value=st.session_state.stored_mu, 
                   key="temp_mu", step=0.01, on_change=update_kinetics)
