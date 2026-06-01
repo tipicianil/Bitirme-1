@@ -42,77 +42,6 @@ button[kind="secondary"] {
     font-size: 1.1rem !important;
 }
 
-/* Cover Page Typography & Proper Spacing */
-.cover-container {
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 40px;
-    color: var(--text-color);
-}
-.cover-uni {
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-}
-.cover-dept {
-    font-size: 1.3rem;
-    font-weight: 600;
-    opacity: 0.9;
-    margin-bottom: 30px;
-    text-transform: uppercase;
-}
-.cover-course {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--text-color);
-    margin-bottom: 30px;
-    line-height: 1.5;
-}
-.cover-title {
-    font-size: 2.1rem; 
-    font-weight: 900; 
-    color: var(--text-color);
-    line-height: 1.4;
-    margin-bottom: 40px;
-    padding: 0 10%;
-}
-.cover-student {
-    font-size: 1.2rem;
-    font-weight: 800;
-    margin-bottom: 30px;
-    line-height: 1.5;
-}
-.cover-advisor {
-    font-size: 1.1rem;
-    font-weight: 500;
-    opacity: 0.9;
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-/* Unified Content Block for Abstract */
-.content-block {
-    padding: 20px 40px;
-    font-size: 1.15rem; 
-    line-height: 1.8; 
-    color: var(--text-color); 
-    text-align: justify; 
-    margin: 0 auto;
-    max-width: 1000px;
-    border-top: 2px dashed rgba(156, 163, 175, 0.3);
-}
-
-.qr-thanks {
-    text-align: center; 
-    font-size: 1.15rem;
-    color: var(--text-color);
-    margin-top: 40px; 
-    margin-bottom: 30px;
-    font-weight: 700; 
-    font-style: italic;
-}
 .knn-box {
     background-color: rgba(59, 130, 246, 0.05);
     border-left: 4px solid #3B82F6;
@@ -132,23 +61,28 @@ button[kind="secondary"] {
 </style>
 """, unsafe_allow_html=True)
 
-# --- SESSION STATE ---
+# --- SESSION STATE (GÜÇLENDİRİLMİŞ HAFIZA) ---
 if 'page' not in st.session_state:
     st.session_state.page = 'landing'
 if 'active_step' not in st.session_state:
     st.session_state.active_step = 'reactor'
 
-# Slider değerlerini hafızada tutuyoruz
-if 'sim_mu' not in st.session_state:
-    st.session_state.sim_mu = 0.45
-if 'sim_Ks' not in st.session_state:
-    st.session_state.sim_Ks = 0.50
+# Değerleri saklayacağımız GİZLİ KASALAR
+if 'stored_mu' not in st.session_state:
+    st.session_state.stored_mu = 0.45
+if 'stored_Ks' not in st.session_state:
+    st.session_state.stored_Ks = 0.50
 
 def enter_simulator():
     st.session_state.page = 'simulator'
 
 def set_step(step):
     st.session_state.active_step = step
+
+# Slider oynatıldığı an değerleri kasaya kaydeden fonksiyon
+def update_kinetics():
+    st.session_state.stored_mu = st.session_state.temp_mu
+    st.session_state.stored_Ks = st.session_state.temp_Ks
 
 # ==========================================
 # 1. LANDING PAGE
@@ -206,8 +140,7 @@ To achieve this objective, a Continuous Stirred-Tank Reactor (CSTR) model was ut
 # ==========================================
 elif st.session_state.page == 'simulator':
     
-    st.markdown('<h2 style="color: var(--text-color); border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0; text-align: center;">Interactive Bioprocess Control Panel</h2>', unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<h2 style="text-align: center;">Interactive Bioprocess Control Panel</h2>', unsafe_allow_html=True)
     
     @st.cache_data
     def load_data():
@@ -219,26 +152,23 @@ elif st.session_state.page == 'simulator':
 
     df = load_data()
     if df is None:
-        st.error("System Error: '120_SuperPro_Input_List.xlsx' database file is missing.")
+        st.error("System Error: Database file missing.")
         st.stop()
 
-    # Session State bağlantısı ile değerleri dinamik olarak çekiyoruz
-    exp_mu = st.session_state.sim_mu
-    exp_Ks = st.session_state.sim_Ks
+    # Sistemin matematiği artık doğrudan GİZLİ KASADAN (stored) okuyor
+    exp_mu = st.session_state.stored_mu
+    exp_Ks = st.session_state.stored_Ks
 
     norm_mu = (df['mu_max_UserSpecified'] - exp_mu) / (0.70 - 0.10)
     norm_Ks = (df['Ks_K1'] - exp_Ks) / (1.50 - 0.01)
-    
     df['Distance'] = np.sqrt(norm_mu**2 + norm_Ks**2)
     matched_idx = df['Distance'].idxmin()
     matched_row = df.loc[matched_idx]
     image_index = int(matched_row['Screenshot_Index'])
     
-    worst_output_kgh = 2.17022
-    best_output_kgh = 2.33290
     scale_factor = (image_index - 1) / 119.0
     efficiency_score = 1.0 + (scale_factor * 9.0)
-    expected_output = worst_output_kgh + (scale_factor * (best_output_kgh - worst_output_kgh))
+    expected_output = 2.17022 + (scale_factor * (2.33290 - 2.17022))
 
     # --- AKORDEON DÜZENİ ---
 
@@ -249,9 +179,15 @@ elif st.session_state.page == 'simulator':
               
     if st.session_state.active_step == 'reactor':
         st.markdown('<div class="step-container">', unsafe_allow_html=True)
-        # slider'ların key parametresi session_state değişkenleriyle eşleşiyor
-        st.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, key="sim_mu", step=0.01)
-        st.slider("Half-Saturation (Ks) [g/L]", 0.01, 1.50, key="sim_Ks", step=0.01)
+        # on_change ile kullanıcı sliderı bıraktığı an değerler kasaya gider
+        st.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, 
+                  value=st.session_state.stored_mu, 
+                  key="temp_mu", step=0.01, on_change=update_kinetics)
+                  
+        st.slider("Half-Saturation (Ks) [g/L]", 0.01, 1.50, 
+                  value=st.session_state.stored_Ks, 
+                  key="temp_Ks", step=0.01, on_change=update_kinetics)
+                  
         st.warning("🔒 **Fixed Constraint:** CSTR capacity mathematically bounded to 90% Working Volume.")
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -263,22 +199,16 @@ elif st.session_state.page == 'simulator':
     if st.session_state.active_step == 'analytics':
         st.markdown('<div class="step-container">', unsafe_allow_html=True)
         col_m1, col_m2 = st.columns([1, 1])
-        
         with col_m1:
             st.markdown(f"""<div class="knn-box">
             <b>Target μ_max:</b> {exp_mu:.2f} ➔ <i>Matched: {matched_row['mu_max_UserSpecified']:.3f}</i><br><br>
             <b>Target K_s:</b> {exp_Ks:.2f} ➔ <i>Matched: {matched_row['Ks_K1']:.3f}</i>
             </div>""", unsafe_allow_html=True)
-            
         with col_m2:
             st.metric(label="Estimated Lactic Acid Output", value=f"~ {expected_output:.5f} kg/h")
-            if efficiency_score >= 8.0:
-                st.success(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
-            elif efficiency_score >= 4.0:
-                st.warning(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
-            else:
-                st.error(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
-                
+            if efficiency_score >= 8.0: st.success(f"**Efficiency Score:** ### ~ {efficiency_score:.1f} / 10.0")
+            elif efficiency_score >= 4.0: st.warning(f"**Efficiency Score:** ### ~ {efficiency_score:.1f} / 10.0")
+            else: st.error(f"**Efficiency Score:** ### ~ {efficiency_score:.1f} / 10.0")
         st.markdown('</div>', unsafe_allow_html=True)
 
     # ADIM 3
@@ -288,10 +218,8 @@ elif st.session_state.page == 'simulator':
               
     if st.session_state.active_step == 'output':
         st.markdown('<div class="step-container">', unsafe_allow_html=True)
-        
         image_file = f"SuperPro_{image_index}.png"
         if os.path.exists(image_file):
-            # Görseli tam merkeze sabitleyen blok
             st.markdown(f"""
             <div style="display: flex; justify-content: center; margin-top: 20px; margin-bottom: 20px;">
                 <img src="data:image/png;base64,{base64.b64encode(open(image_file, 'rb').read()).decode()}" width="600" style="border: 1px solid #ccc; border-radius: 5px;">
@@ -299,5 +227,4 @@ elif st.session_state.page == 'simulator':
             """, unsafe_allow_html=True)
         else:
             st.error("Image file missing.")
-            
         st.markdown('</div>', unsafe_allow_html=True)
