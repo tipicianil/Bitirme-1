@@ -132,11 +132,13 @@ button[kind="secondary"] {
 </style>
 """, unsafe_allow_html=True)
 
-# --- SESSION STATE FOR NAVIGATION & WORKFLOW ---
+# --- SESSION STATE ---
 if 'page' not in st.session_state:
     st.session_state.page = 'landing'
 if 'active_step' not in st.session_state:
     st.session_state.active_step = 'reactor'
+
+# Slider değerlerini hafızada tutuyoruz
 if 'sim_mu' not in st.session_state:
     st.session_state.sim_mu = 0.45
 if 'sim_Ks' not in st.session_state:
@@ -149,7 +151,7 @@ def set_step(step):
     st.session_state.active_step = step
 
 # ==========================================
-# 1. LANDING PAGE (Formal Cover & Abstract)
+# 1. LANDING PAGE
 # ==========================================
 if st.session_state.page == 'landing':
     
@@ -168,7 +170,7 @@ if st.session_state.page == 'landing':
 <div class="cover-course">
 BIOE 4298.7<br>
 Bioengineering Project-1<br>
-Project Report
+Midterm Project Report
 </div>
 <div class="cover-title">
 “Design and kinetic modeling of the Lactiplantibacillus plantarum:<br>
@@ -200,14 +202,13 @@ To achieve this objective, a Continuous Stirred-Tank Reactor (CSTR) model was ut
         st.button("Launch Interactive Simulator", on_click=enter_simulator, type="primary", use_container_width=True)
 
 # ==========================================
-# 2. SIMULATOR PAGE (Accordion Process Flow)
+# 2. SIMULATOR PAGE
 # ==========================================
 elif st.session_state.page == 'simulator':
     
     st.markdown('<h2 style="color: var(--text-color); border-bottom: 2px solid #E5E7EB; padding-bottom: 10px; margin-top: 0; text-align: center;">Interactive Bioprocess Control Panel</h2>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # --- VERİ VE KNN ALGORİTMASI HAZIRLIĞI ---
     @st.cache_data
     def load_data():
         try:
@@ -221,7 +222,7 @@ elif st.session_state.page == 'simulator':
         st.error("System Error: '120_SuperPro_Input_List.xlsx' database file is missing.")
         st.stop()
 
-    # Session state'teki değerleri çekip arka planda matematiği çözüyoruz
+    # Session State bağlantısı ile değerleri dinamik olarak çekiyoruz
     exp_mu = st.session_state.sim_mu
     exp_Ks = st.session_state.sim_Ks
 
@@ -239,28 +240,23 @@ elif st.session_state.page == 'simulator':
     efficiency_score = 1.0 + (scale_factor * 9.0)
     expected_output = worst_output_kgh + (scale_factor * (best_output_kgh - worst_output_kgh))
 
-    # ==========================================
-    # AKORDEON DÜZENİ (BUTON -> İÇERİK -> BUTON)
-    # ==========================================
+    # --- AKORDEON DÜZENİ ---
 
-    # --- ADIM 1 ---
+    # ADIM 1
     st.button("⚙️ Enter Kinetic Parameters", use_container_width=True, 
               type="primary" if st.session_state.active_step == 'reactor' else "secondary",
               on_click=set_step, args=('reactor',))
               
     if st.session_state.active_step == 'reactor':
         st.markdown('<div class="step-container">', unsafe_allow_html=True)
-        st.markdown("#### Control Panel: Strain Kinetics")
-        st.info("Adjust the experimental Monod parameters. The system will automatically calculate the nearest industrial scenario.")
-        
+        # slider'ların key parametresi session_state değişkenleriyle eşleşiyor
         st.slider("Max Growth Rate (μ_max) [1/h]", 0.10, 0.70, key="sim_mu", step=0.01)
         st.slider("Half-Saturation (Ks) [g/L]", 0.01, 1.50, key="sim_Ks", step=0.01)
-        
         st.warning("🔒 **Fixed Constraint:** CSTR capacity mathematically bounded to 90% Working Volume.")
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- ADIM 2 ---
-    st.button("📊 Mathematical/Theoretical Calculations & Analytics", use_container_width=True, 
+    # ADIM 2
+    st.button("📊 Mathematical/Theoretical Calculations", use_container_width=True, 
               type="primary" if st.session_state.active_step == 'analytics' else "secondary",
               on_click=set_step, args=('analytics',))
               
@@ -269,19 +265,13 @@ elif st.session_state.page == 'simulator':
         col_m1, col_m2 = st.columns([1, 1])
         
         with col_m1:
-            st.markdown("#### Database Matching Log")
             st.markdown(f"""<div class="knn-box">
-            <b>Your Target μ_max:</b> {exp_mu:.2f} ➔ <i>System Matched: {matched_row['mu_max_UserSpecified']:.3f}</i><br><br>
-            <b>Your Target K_s:</b> {exp_Ks:.2f} ➔ <i>System Matched: {matched_row['Ks_K1']:.3f}</i>
+            <b>Target μ_max:</b> {exp_mu:.2f} ➔ <i>Matched: {matched_row['mu_max_UserSpecified']:.3f}</i><br><br>
+            <b>Target K_s:</b> {exp_Ks:.2f} ➔ <i>Matched: {matched_row['Ks_K1']:.3f}</i>
             </div>""", unsafe_allow_html=True)
             
         with col_m2:
-            st.markdown("#### Projected Efficiency")
-            
-            # Üretim miktarı artık üstte
             st.metric(label="Estimated Lactic Acid Output", value=f"~ {expected_output:.5f} kg/h")
-            
-            # Verim skoru onun altında
             if efficiency_score >= 8.0:
                 st.success(f"**Efficiency Score:**\n### ~ {efficiency_score:.1f} / 10.0")
             elif efficiency_score >= 4.0:
@@ -295,13 +285,13 @@ elif st.session_state.page == 'simulator':
     st.button("🏭 SuperPro Designer Output", use_container_width=True, 
               type="primary" if st.session_state.active_step == 'output' else "secondary",
               on_click=set_step, args=('output',))
+              
     if st.session_state.active_step == 'output':
         st.markdown('<div class="step-container">', unsafe_allow_html=True)
-        st.markdown("#### Retrieved SuperPro Designer Flowsheet")
         
         image_file = f"SuperPro_{image_index}.png"
         if os.path.exists(image_file):
-            # Görseli tam merkeze alan HTML/CSS bloğu
+            # Görseli tam merkeze sabitleyen blok
             st.markdown(f"""
             <div style="display: flex; justify-content: center; margin-top: 20px; margin-bottom: 20px;">
                 <img src="data:image/png;base64,{base64.b64encode(open(image_file, 'rb').read()).decode()}" width="600" style="border: 1px solid #ccc; border-radius: 5px;">
@@ -309,4 +299,5 @@ elif st.session_state.page == 'simulator':
             """, unsafe_allow_html=True)
         else:
             st.error("Image file missing.")
+            
         st.markdown('</div>', unsafe_allow_html=True)
