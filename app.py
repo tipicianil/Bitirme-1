@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for Full Page Frame, Cover Page & RED Buttons
+# Custom CSS for Full Page Frame, Cover Page, RED Buttons & Lightbox
 st.markdown("""
 <style>
 .stApp {
@@ -129,6 +129,34 @@ button[kind="secondary"] {
     border: 1px solid rgba(156, 163, 175, 0.2);
     border-top: none;
 }
+
+/* TIKLANINCA BÜYÜYEN GÖRSEL (LIGHTBOX) MANTIĞI */
+.lightbox-check {
+    display: none;
+}
+.lightbox-img {
+    cursor: zoom-in;
+    max-width: 1000px;
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+}
+.lightbox-check:checked + label .lightbox-img {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95vw;
+    max-width: 1600px; /* Geniş ekranlarda muazzam durur */
+    z-index: 999999;
+    cursor: zoom-out;
+    box-shadow: 0 0 0 10000px rgba(0,0,0,0.85); /* Arkaplanı sinematik şekilde karartır */
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -190,7 +218,7 @@ Prof. Dr. Nihat Alpagu SAYAR
 </div>
 </div>""", unsafe_allow_html=True)
     
-    # METİN, MADDELER VE YENİ GÖRSEL BURADA:
+    # MADDELER BÖLÜM 1
     st.markdown("""<div class="content-block">
 <b>Project Abstract & Evolution:</b><br>
 This interactive digital twin was developed within the scope of a senior graduation project at the Bioengineering Department of Marmara University. Engineered by Mehmet Anıl Tipici, this platform bridges the gap between theoretical biological kinetics and industrial-scale chemical plant operations. 
@@ -198,27 +226,32 @@ This interactive digital twin was developed within the scope of a senior graduat
 <b>Project Milestones:</b>
 <ul>
     <li style="margin-bottom: 10px;"><b>Foundation & Waste Valorization:</b> The study initially aimed to design a sustainable, closed-loop bioprocess for converting organic food waste into lactic acid—a crucial precursor for PLA bioplastics—using <i>Lactiplantibacillus plantarum</i>.</li>
-    <li style="margin-bottom: 10px;"><b>Process Re-engineering:</b> During the early design stages, a Batch Processing topology was investigated. However, due to synchronization latency and software constraints within SuperPro Designer, the plant configuration was strategically re-engineered into a Continuous Flow (CSTR) model to ensure steady-state stability.</li>
-    <li style="margin-bottom: 10px;"><b>The Digital Twin Expansion:</b> Building upon the successful continuous process model, the project's vision significantly expanded. Instead of limiting the simulation to a single microbial strain, the scope shifted to evaluating and comparing multiple strains with distinct kinetic potentials.</li>
-    <li><b>Interactive Kinetic Simulation:</b> The current platform utilizes a K-Nearest Neighbors (KNN) machine learning algorithm. It actively maps user-defined Monod kinetics (Max Growth Rate and Half-Saturation) against a comprehensive database of 120 pre-simulated industrial configurations, delivering real-time efficiency assessments and precise SuperPro Designer flowsheets.</li>
+    <li style="margin-bottom: 20px;"><b>Process Re-engineering:</b> During the early design stages, a Batch Processing topology was investigated. However, due to synchronization latency and software constraints within SuperPro Designer, the plant configuration was strategically re-engineered into a Continuous Flow (CSTR) model to ensure steady-state stability.</li>
 </ul>
-<br>
-<h4 style="text-align: center; margin-bottom: 20px;">Overall Process Flow Diagram</h4>
 </div>""", unsafe_allow_html=True)
 
-    # İLK SAYFAYA GÖRSEL EKLEME KISMI
-    # Lütfen sunuma eklemek istediğin process resminin adını aşağıya doğru yaz (şu an 'image_0d8649.png' olarak varsaydım)
-    process_image_path = "image_0d8649.png" 
+    # TIKLANINCA BÜYÜYEN SÜREÇ GÖRSELİ (CSS LIGHTBOX HİLESİ)
+    process_image_path = "image_0d8649.png"
     if os.path.exists(process_image_path):
+        encoded_process = base64.b64encode(open(process_image_path, 'rb').read()).decode()
         st.markdown(f"""
-        <div style="display: flex; justify-content: center; margin-bottom: 30px;">
-            <img src="data:image/png;base64,{base64.b64encode(open(process_image_path, 'rb').read()).decode()}" width="800" style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; background-color: white;">
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <input type="checkbox" id="zoom-img-1" class="lightbox-check">
+            <label for="zoom-img-1" style="width: 100%; max-width: 1000px; text-align: center;">
+                <img src="data:image/png;base64,{encoded_process}" class="lightbox-img" title="Click to enlarge">
+            </label>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown(f'<p style="text-align:center; color:red;">Process Flow image ({process_image_path}) not found. Please upload it to your folder.</p>', unsafe_allow_html=True)
 
+    # MADDELER BÖLÜM 2
     st.markdown("""<div class="content-block">
+<ul>
+    <li style="margin-bottom: 10px;"><b>The Digital Twin Expansion:</b> Building upon the successful continuous process model, the project's vision significantly expanded. Instead of limiting the simulation to a single microbial strain, the scope shifted to evaluating and comparing multiple strains with distinct kinetic potentials.</li>
+    <li><b>Interactive Kinetic Simulation:</b> The current platform utilizes a K-Nearest Neighbors (KNN) machine learning algorithm. It actively maps user-defined Monod kinetics (Max Growth Rate and Half-Saturation) against a comprehensive database of 120 pre-simulated industrial configurations, delivering real-time efficiency assessments and precise SuperPro Designer flowsheets.</li>
+</ul>
+<br>
 <div class="qr-thanks">Special thanks are extended to the jury members and attendees for scanning the QR code and exploring the details of this graduation project.</div>
 </div>""", unsafe_allow_html=True)
     
