@@ -205,8 +205,8 @@ Bioengineering Project-1<br>
 Final Project Report
 </div>
 <div class="cover-title">
-“Design and kinetic modeling of the Lactiplantibacillus plantarum:<br>
-compare different strains with different kinetic parameters”
+“Design and Kinetic Modeling of Lactiplantibacillus plantarum:<br>
+A Digital Twin Approach for Industrial Lactic Acid Production”
 </div>
 <div class="cover-student">
 Mehmet Anıl Tipici<br>
